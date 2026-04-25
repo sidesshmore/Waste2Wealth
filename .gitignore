@@ -1,0 +1,63 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+.env
+.env.*
+!.env.example
+
+# Backend secrets — private keys, never commit
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.env
+backend/firebase-adminsdk.json
+backend/escrow-keypair.json
+
+# Firebase / Google — private keys
+google-services.json
+GoogleService-Info.plist
+
+# EAS credentials
+credentials.json
+
+# Cloudinary skills
+.agents/
+skills-lock.json
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android

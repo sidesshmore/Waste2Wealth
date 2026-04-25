@@ -1,0 +1,16 @@
+export const Colors = {
+  greenDark:     '#25671E',
+  greenMid:      '#519A66',
+  greenTint:     '#E9F5EB',
+  bg:            '#FFFFFF',
+  surface:       '#F5F5F5',
+  border:        '#E5E7EB',
+  textPrimary:   '#111111',
+  textSecondary: '#6B7280',
+  solPurple:     '#9945FF',
+  solGreen:      '#14F195',
+  worldBlue:     '#0077B6',
+  mapRed:        '#FF3B30',
+  mapAmber:      '#F4A261',
+  error:         '#FF3B30',
+} as const;

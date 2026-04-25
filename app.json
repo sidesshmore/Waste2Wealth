@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Waste2Wealth",
+    "slug": "waste2wealth",
+    "scheme": "waste2wealth",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "android": {
+      "package": "com.waste2wealth.app",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.waste2wealth.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "supportsTablet": false,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["worldcoin"]
+      }
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-camera", { "cameraPermission": "Allow Waste2Wealth to use your camera to photograph garbage." }],
+      ["expo-location", { "locationAlwaysAndWhenInUsePermission": "Allow Waste2Wealth to use your location to verify cleanup positions." }],
+      ["expo-notifications", { "sounds": [] }],
+      ["@rnmapbox/maps", { "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoic2lkZGhlc2gxMjEiLCJhIjoiY21vZWl3cHF0MGY0NTJxcHMwNXIzbjZ3ZCJ9.8-LAEQo2Uav2NTCDWryd_w" }]
+    ]
+  }
+}
