@@ -1,6 +1,6 @@
 from ..db import db
 
-APPROVE_THRESHOLD = 5
+APPROVE_THRESHOLD = 1
 REJECT_THRESHOLD  = 3
 
 
