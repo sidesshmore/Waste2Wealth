@@ -2,7 +2,7 @@
 
 **Turn litter into Solana rewards.** Report garbage, clean it up, get paid — verified by AI and real human identities.
 
-![User Journey](docs/User_Journey.png)
+<img src="docs/User_Journey.png" width="520" />
 
 ---
 
@@ -44,13 +44,13 @@ Every cleanup passes through 5 stages before SOL is released:
 4. **5-agent Gemini consensus** — Vision AI, Location Guard, Pattern Scanner, Fraud Detector, and Arbiter run in parallel via `asyncio.gather()`. Frontend reveals each verdict with typing animations.
 5. **World ID-gated human vote** — one World ID nullifier = one vote per cleanup. No bots, no duplicate accounts.
 
-![Cloudinary AI Enrichment Pipeline](docs/Claudinary.png)
+<img src="docs/Claudinary.png" width="480" />
 
 ---
 
 ## Anti-Cheat
 
-![World ID Sybil Resistance](docs/WorldU.png)
+<img src="docs/WorldU.png" width="480" />
 
 - Cleaners cannot verify their own reports (`cleaner_id != reporter_id`)
 - One World ID = one vote per cleanup, enforced by nullifier stored in the `votes` table
@@ -61,7 +61,7 @@ Every cleanup passes through 5 stages before SOL is released:
 
 ## Rewards
 
-![Solana Reward Distribution](docs/Solana.png)
+<img src="docs/Solana.png" width="480" />
 
 Severity is AI-assigned at report time. Payouts scale with real-world impact:
 
@@ -77,7 +77,7 @@ Wallets are generated client-side via `@solana/web3.js` and stored in `expo-secu
 
 ## Architecture
 
-![Event-Driven Backend Architecture](docs/Arista.png)
+<img src="docs/Arista.png" width="480" />
 
 - **Non-blocking**: FastAPI `BackgroundTasks` returns HTTP immediately; Cloudinary moderation and Gemini tagging run async
 - **Event-driven**: map and verify screens subscribe to Supabase `postgres_changes` WebSocket — zero polling
