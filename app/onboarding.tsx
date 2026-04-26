@@ -6,9 +6,23 @@ import { useState } from 'react';
 import { Keypair } from '@solana/web3.js';
 import * as SecureStore from 'expo-secure-store';
 import { signInWithGoogle } from '../lib/auth';
+import { supabase } from '../lib/supabase';
 import { api } from '../lib/api';
 import { Colors } from '../constants/colors';
 import { S } from '../constants/spacing';
+
+async function syncAndNavigate() {
+  const { data: sync } = await api.post('/users/sync', {}) as any;
+  if (sync.is_new) {
+    const kp = Keypair.generate();
+    await SecureStore.setItemAsync(
+      'solana_secret_key',
+      Buffer.from(kp.secretKey).toString('base64'),
+    );
+    await api.post('/users/wallet', { wallet_address: kp.publicKey.toString() });
+  }
+  router.replace('/(tabs)');
+}
 
 export default function OnboardingScreen() {
   const [loading, setLoading] = useState(false);
@@ -17,19 +31,20 @@ export default function OnboardingScreen() {
     setLoading(true);
     try {
       await signInWithGoogle();
+      await syncAndNavigate();
+    } catch (e: any) {
+      Alert.alert('Sign in failed', e.message ?? 'Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const { data: sync } = await api.post('/users/sync', {}) as any;
-
-      if (sync.is_new) {
-        const kp = Keypair.generate();
-        await SecureStore.setItemAsync(
-          'solana_secret_key',
-          Buffer.from(kp.secretKey).toString('base64'),
-        );
-        await api.post('/users/wallet', { wallet_address: kp.publicKey.toString() });
-      }
-
-      router.replace('/(tabs)');
+  const handleAnonSignIn = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      await syncAndNavigate();
     } catch (e: any) {
       Alert.alert('Sign in failed', e.message ?? 'Please try again.');
     } finally {
@@ -56,6 +71,14 @@ export default function OnboardingScreen() {
             ? <ActivityIndicator color="#fff" />
             : <Text style={styles.buttonText}>Continue with Google</Text>}
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.anonButton, loading && styles.buttonDisabled]}
+          onPress={handleAnonSignIn}
+          disabled={loading}
+        >
+          <Text style={styles.anonButtonText}>Continue as Guest</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -71,4 +94,6 @@ const styles = StyleSheet.create({
   button:         { backgroundColor: Colors.greenDark, borderRadius: 8, height: 56, justifyContent: 'center', alignItems: 'center' },
   buttonDisabled: { opacity: 0.6 },
   buttonText:     { color: '#fff', fontSize: 16, fontFamily: 'InterVariable', fontWeight: '510' as any },
+  anonButton:     { height: 48, justifyContent: 'center', alignItems: 'center' },
+  anonButtonText: { color: Colors.textSecondary, fontSize: 15, fontFamily: 'InterVariable' },
 });

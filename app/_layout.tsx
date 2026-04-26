@@ -6,6 +6,20 @@ import * as Notifications from 'expo-notifications';
 import MapboxGL from '@rnmapbox/maps';
 import { useAppFonts } from '../constants/typography';
 import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
+
+const EAS_PROJECT_ID = '4f1a9287-ce37-469e-b2cf-d1520189bd60';
+
+async function registerPushToken() {
+  try {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') return;
+    const token = await Notifications.getExpoPushTokenAsync({ projectId: EAS_PROJECT_ID });
+    await api.post('/users/push-token', { token: token.data });
+  } catch {
+    // Push registration is non-critical — never block auth flow
+  }
+}
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN!);
 
@@ -31,18 +45,22 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
+
     supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) router.replace('/onboarding');
-      else router.replace('/(tabs)');
+      if (!data.session) {
+        router.replace('/onboarding');
+      } else {
+        router.replace('/(tabs)');
+        registerPushToken();
+      }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') router.replace('/onboarding');
     });
     return () => listener.subscription.unsubscribe();
-  }, []);
-
-  if (!loaded) return null;
+  }, [loaded]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
