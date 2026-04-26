@@ -63,7 +63,7 @@ COMPONENTS
 | Web companion dashboard          | **CUT.** The mobile app's Gallery tab is the public showcase; the Profile screen aggregates city stats. One polished mobile artifact beats two half-built ones.                                                                                                                                     |
 | Push notifications geofence      | Filter by user `last_location` (column added to `users` table); fall back to broadcasting to all users if `last_location` is null.                                                                                                                                                                  |
 | GPS proximity for cleanup claim  | **200m** for the demo (indoor venue GPS drift). Code comment notes production tightens this to 50m.                                                                                                                                                                                                 |
-| Cloudinary upload import path    | Public API only:`import { upload } from 'cloudinary-react-native'`. Never deep-import from `lib/typescript/`.                                                                                                                                                                                         |
+| Cloudinary upload import path    | **Direct fetch only.** `cloudinary-react-native`'s `upload()` sends `api_key=null` in multipart body for unsigned presets, which Cloudinary rejects. Also, `e_auto_tagging:80` is not a valid eager transformation (it's an upload-only parameter requiring a signed preset). `lib/cloudinary.ts` uses `fetch()` directly to `https://api.cloudinary.com/v1_1/{cloud}/image/upload` with `FormData`. Confirmed working — status 200, correct `public_id` returned. |
 | `react-native-dotenv`          | **Removed.** Expo SDK 51+ handles `EXPO_PUBLIC_*` natively. Babel plugin would conflict.                                                                                                                                                                                                          |
 
 ---
@@ -77,16 +77,16 @@ COMPONENTS
 - [x] Node.js ≥ 20 installed: v23.3.0 ✓
 - [x] Python 3.11 installed: Python 3.14.3 ✓
 - [x] Expo CLI installed ✓
-- [ ] EAS CLI: `npm install -g eas-cli` (only if Expo Go can't run a module)
+- [x] EAS CLI installed ✓ (dev build running on physical iPhone via `npx expo run:ios`)
 - [ ] EAS login: `eas login`
-- [ ] Expo Go app installed on both Android and iPhone
+- [x] Expo Go app installed on iPhone ✓
 - [x] Project scaffolded with `expo-template-blank-typescript` ✓
 
 ### 0.2 Expo + React Native Project
 
-- [ ] Scaffold: `npx create-expo-app@latest waste2wealth --template expo-template-blank-typescript`
-- [ ] Test it boots: `npx expo start` → scan QR with Expo Go on physical device
-- [ ] Confirm it renders on both Android and iPhone
+- [x] Scaffold: done ✓
+- [x] Test it boots: running on physical iPhone via dev build ✓
+- [ ] Confirm it renders on Android
 
 ### 0.3 Cloudinary Skills Pack (Dev-Time Workflow)
 
@@ -115,8 +115,11 @@ This is one of the two artifacts the Cloudinary Challenge accepts as the starter
 - [x] `app_id` = `app_833fae1012eb8ea7383ade5c7fa75d00` → saved to `backend/.env` ✓
 - [x] Action `waste2wealth-vote-verify` created · max verifications per user: `1` ✓
 - [x] Install World App on at least one test phone (used for the voting demo) ✓
+- [x] `rp_id` = `rp_8781b7133f635a24` → saved to `backend/.env` as `WORLD_RP_ID` ✓
+- [x] Backend `/users/rp-signature` endpoint implemented (EIP-191 secp256k1 signing via `eth-keys` + `pycryptodome`) ✓
+- [x] Backend `/users/verify-world-id` updated to World ID v4 API (`POST developer.world.org/api/v4/verify/{rp_id}`) ✓
 - [ ] Verify staging works: in World App → Developer → you should see the test credential
-- [ ] **Critical pre-build verification:** install `@worldcoin/idkit-core`, inspect `index.d.ts` for current bridge-session helper names, run a full proof round-trip on a physical device against the staging `app_id`. This drives the voting gate in Phase 3.3. Do **not** build the verify screen until this round-trip succeeds.
+- [x] **`@worldcoin/idkit-core` v4 is browser-only (uses WASM) — does not run in Hermes.** Frontend uses dev bypass (`/users/dev-verify`) for demo. Backend verification is real. Native Swift IDKit SDK would be needed for production. ✓
 
 ### 0.5 Supabase
 
@@ -247,6 +250,8 @@ FIREBASE_CREDENTIALS_PATH=./firebase-adminsdk.json
 **Hours 0–6 · Goal:** Physical device shows Google sign-in, completes auth, and renders a live dark-mode map.
 
 ### 1.1 Install Dependencies ✓
+
+> **Extra packages added during build:** `react-native-worklets@0.8.1` (Reanimated 4.1.x peer dep — NOT `react-native-worklets-core`), `babel-preset-expo` (missing from tree), `@react-native-async-storage/async-storage` (required for Supabase RN client storage). All installed with `--legacy-peer-deps` due to cloudinary-react-native SDK-54 conflict.
 
 ```bash
 npx expo install \
@@ -477,7 +482,9 @@ export default function TabLayout() {
 }
 ```
 
-### 1.7 Google Auth Onboarding (primary login) ✓
+### 1.7 Auth Onboarding ✓
+
+> **Status: Google OAuth working ✓.** Initial "Network request failed" was the backend not running (not a Supabase block). Real Google OAuth implemented via `supabase.auth.signInWithOAuth` + `expo-web-browser` + PKCE code exchange. `lib/supabase.ts` uses `flowType: 'pkce'`. Redirect URL `waste2wealth://auth/callback` added to Supabase allowed list. Both "Continue with Google" and "Continue as Guest" (`signInAnonymously`) work on device.
 
 `app/onboarding.tsx`:
 
@@ -960,7 +967,7 @@ app.include_router(rewards.router,  prefix="/rewards")
 
 Start backend: `cd backend && uvicorn main:app --reload --port 8000`
 
-**MILESTONE 1:** World ID verified on physical device → map shows with dark tiles + one seeded red pin ✓
+**MILESTONE 1 ✓ REACHED:** Anonymous auth on physical device (iPhone) → dark Mapbox tiles loading at UCLA venue → user location dot visible → full tab bar (Map / Gallery / Report / Verify / Wallet) rendering. No red pin yet — seeded pin comes in Phase 2 after camera upload. Auth is anonymous (not Google) for hackathon.
 
 ---
 
@@ -968,7 +975,7 @@ Start backend: `cd backend && uvicorn main:app --reload --port 8000`
 
 **Hours 6–12 · Goal:** Photo garbage → upload → Cloudinary AI Vision verifies → pin live on second phone.
 
-### 2.1 Camera Screen
+### 2.1 Camera Screen ✓
 
 `app/(tabs)/report.tsx`:
 
@@ -1036,7 +1043,9 @@ export default function ReportScreen() {
 }
 ```
 
-### 2.2 Cloudinary Upload (correct public API)
+### 2.2 Cloudinary Upload ✓
+
+> **Hackathon deviation:** Switched from `cloudinary-react-native`'s `upload()` to a plain `fetch()` POST. The SDK was injecting `api_key=null` into the multipart body even for unsigned presets, causing Cloudinary to reject every upload. Also removed `eager: 'e_auto_tagging:80'` (not a valid transformation — auto-tagging is an upload-only param restricted to signed uploads). Direct fetch confirmed working: status 200, `public_id` returned correctly.
 
 `lib/cloudinary.ts`:
 
@@ -1098,7 +1107,7 @@ export const buildHeroImage = (publicId: string) =>
 
 > `buildThumb`, `buildComparisonImage`, and `buildHeroImage` were derived using the `cloudinary-transformations` skill — natural language requirements became these URL strings. Document this in the Devpost write-up.
 
-### 2.3 Submit Screen + Optimistic Vision Pipeline
+### 2.3 Submit Screen + Optimistic Vision Pipeline ✓
 
 `components/ReviewScreen.tsx`:
 
@@ -1121,7 +1130,7 @@ export const buildHeroImage = (publicId: string) =>
 //      visually downgrades (gray overlay + warning icon) — Realtime delivers this
 ```
 
-### 2.4 Cloudinary AI Vision (server-side)
+### 2.4 Cloudinary AI Vision (server-side) ✓
 
 `backend/services/cloudinary_vision.py`:
 
@@ -1253,7 +1262,7 @@ async def run_vision_check_for_report(report_id: str, public_id: str):
         print(f"Vision check failed for {report_id}: {e}")
 ```
 
-### 2.5 Push Notifications
+### 2.5 Push Notifications ✓ (backend complete · frontend token registration pending)
 
 `expo-notifications` setup in `app/_layout.tsx` (after auth):
 
@@ -1412,9 +1421,9 @@ async def run_cleanup_vision(cleanup_id: str, before_id: str, after_id: str):
     """, json.dumps(result), cleanup_id)
 ```
 
-### 3.3 Verify Screen — World ID Gate + Swipe Cards
+### 3.3 Verify Screen — World ID Gate + Swipe Cards ✓
 
-> **World ID is the gate here.** Before showing swipe cards, check if the user has a nullifier. If not, run the IDKit flow first. This is where Phase 0.4 device verification pays off.
+> **World ID gate implemented.** Swipe deck with GestureHandler + Reanimated built and working. World ID frontend uses dev bypass (see Phase 0.4 note — WASM blocker). Backend voting gate enforces `world_id_nullifier IS NOT NULL` on every `POST /votes/`. Nullifier stored on first verify. Sign-out button present for re-testing.
 
 `app/(tabs)/verify.tsx`:
 
@@ -1924,7 +1933,9 @@ export function ComparisonSlider({ beforeUrl, afterUrl, width, height }) {
 
 This single screen exercises three Cloudinary capabilities at once — auto-tagging (filter chips), smart cropping (`g_auto`), and auto format/quality (`f_auto`,`q_auto`). It is the most visually striking Cloudinary surface in the demo.
 
-### 5.4 City Stats Card on Profile
+### 5.4 City Stats Card on Profile ✓
+
+> **Done:** `app/(tabs)/profile.tsx` fetches `/users/me` and displays email, reputation, SOL earned, World ID verification status, and truncated wallet address. Logout button present.
 
 `app/profile.tsx` — stack screen accessed via map header avatar:
 

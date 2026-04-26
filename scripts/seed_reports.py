@@ -24,7 +24,7 @@ import requests
 import cloudinary, cloudinary.uploader
 import google.generativeai as genai
 
-# ── Credentials (from backend/.env) ──────────────────────────────────────────
+# ── Credentials (set in backend/.env, loaded via environment) ─────────────────
 CLOUD_NAME   = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
 CLOUD_KEY    = os.environ.get("CLOUDINARY_API_KEY", "")
 CLOUD_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "")
