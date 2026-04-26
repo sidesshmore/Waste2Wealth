@@ -20,22 +20,58 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "ios": {
       "bundleIdentifier": "com.waste2wealth.app",
       "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": false,
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["worldcoin"]
+        "LSApplicationQueriesSchemes": [
+          "worldcoin",
+          "worldcoin"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "plugins": [
       "expo-router",
-      ["expo-camera", { "cameraPermission": "Allow Waste2Wealth to use your camera to photograph garbage." }],
-      ["expo-location", { "locationAlwaysAndWhenInUsePermission": "Allow Waste2Wealth to use your location to verify cleanup positions." }],
-      ["expo-notifications", { "sounds": [] }],
-      ["@rnmapbox/maps", { "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoic2lkZGhlc2gxMjEiLCJhIjoiY21vZWl3cHF0MGY0NTJxcHMwNXIzbjZ3ZCJ9.8-LAEQo2Uav2NTCDWryd_w" }]
-    ]
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Waste2Wealth to use your camera to photograph garbage."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Waste2Wealth to use your location to verify cleanup positions."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": []
+        }
+      ],
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoic2lkZGhlc2gxMjEiLCJhIjoiY21vZWl3cHF0MGY0NTJxcHMwNXIzbjZ3ZCJ9.8-LAEQo2Uav2NTCDWryd_w"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4f1a9287-ce37-469e-b2cf-d1520189bd60"
+      }
+    }
   }
 }
